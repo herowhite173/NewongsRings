@@ -1,0 +1,7 @@
+streamlit==1.53.0
+numpy==2.4.1
+matplotlib==3.10.8
+qrcode[pil]==7.4.2
+Pillow==11.3.0
+
+imageio

@@ -1,5 +1,6 @@
-#优化代码，取消多余库，函数，注释，空行，修正数据类型
-#导出图片，增加自动选取当前透镜半径功能
+#修改字号大小：演示结果导出  实验数据预览
+#实验数据预览小标题修改成：左/mm，右/mm
+#解决手机端界面上方空白问题
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
@@ -281,7 +282,7 @@ def show_uncertainty_dialog() -> None:
     left_row = [f"{left_data[n]:.3f}" if left_data[n] is not None else "未采集" for n in RECORD_N]
     right_row = [f"{right_data[n]:.3f}" if right_data[n] is not None else "未采集" for n in RECORD_N]
 
-    df = pd.DataFrame([left_row, right_row], columns=RECORD_N, index=["左侧读数/mm", "右侧读数/mm"])
+    df = pd.DataFrame([left_row, right_row], columns=RECORD_N, index=["左/mm", "右/mm"])
     df.columns.name = "环数/个"
     st.dataframe(df, use_container_width=True)
 
@@ -380,14 +381,40 @@ def main() -> None:
     except Exception:
         mobile_view = False
 
-    # 隐藏默认UI元素
-    st.markdown("""
+    st.markdown(
+        """ 
         <style> 
+        /* 隐藏顶部标题栏 + 右上角三个点菜单 */
         header[data-testid="stHeader"] { display: none !important; }
+        /* 隐藏右下角的两个图标（帮助+升级） */
         div[data-testid="stToolbar"] { display: none !important; }
         .stApp > div:nth-child(3) { display: none !important; }
+
+        html, body, [class*="stText"] { font-size: 16px !important; } 
+        .stButton>button { font-size: 15px !important; } 
+        .stNumberInput, .stSelectbox { font-size: 15px !important; } 
+
+        /* 手机竖屏样式 */
+        @media only screen and (max-width: 768px) and (orientation: portrait) {
+            .stMarkdown h3 {
+                display: none !important;
+            }
+            .stMarkdown h4 {
+                font-size: 15px !important;
+                font-weight: normal !important;
+                margin-top: 4px !important;
+                margin-bottom: 4px !important;
+            }
+        }
+
+        @media only screen and (max-width: 1024px) {
+            .block-container { padding: 0px 10px 10px 10px !important; max-width: 100% !important; }
+            img, .stPyplot { max-height: 65vh !important; object-fit: contain !important; }
+        }
         </style> 
-    """, unsafe_allow_html=True)
+        """,
+        unsafe_allow_html=True,
+    )
 
     # 移动端按钮
     if mobile_view:
@@ -460,7 +487,7 @@ def main() -> None:
         # 半径选择
         col_lbl, col_ctrl = st.columns([1, 2])
         with col_lbl:
-            st.markdown("#### 牛顿环半径")
+            st.markdown("牛顿环半径")
         with col_ctrl:
             R_options = [800, 1500]
             selected_R = st.selectbox(
@@ -503,7 +530,7 @@ def main() -> None:
                     st.rerun()
 
             with col_right_move:
-                if st.button("向右移动", use_container_width=True, key="right_move_btn_sim"):
+                if st.button("向右移动2级", use_container_width=True, key="right_move_btn_sim"):
                     R = st.session_state.R_mm * 1e-3
                     lam = 589.3e-9
 
@@ -539,7 +566,7 @@ def main() -> None:
 
         # 演示模式导出
         if demo_enabled:
-            st.markdown("#### 演示结果导出")
+            st.markdown("演示结果导出")
             demo_export_remaining = get_demo_export_remaining()
             export_disabled = demo_export_remaining <= 0
 
@@ -568,13 +595,13 @@ def main() -> None:
 
         # 实验模式数据预览
         if sim_enabled:
-            st.markdown("#### 实验数据预览")
+            st.markdown("实验数据预览")
             left_data = [st.session_state.left_pos.get(k) for k in RECORD_N]
             left_row = [f"{v:.3f}" if v is not None else "" for v in left_data]
             right_data = [st.session_state.right_pos.get(k) for k in RECORD_N]
             right_row = [f"{v:.3f}" if v is not None else "" for v in right_data]
 
-            df = pd.DataFrame([left_row, right_row], columns=RECORD_N, index=["左侧", "右侧"])
+            df = pd.DataFrame([left_row, right_row], columns=RECORD_N, index=["左/mm", "右/mm"])
             st.dataframe(df, use_container_width=True)
 
             st.markdown("<br>")
